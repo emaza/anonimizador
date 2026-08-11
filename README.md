@@ -5,10 +5,11 @@
 
 Pegas un email, contrato o transcripción (o arrastras un `.txt`, `.md`, `.docx` o `.pdf`),
 pulsas **Anonimizar** y obtienes el mismo texto con los datos sensibles convertidos en
-marcadores de color. Lo llevas a ChatGPT, trabajas con él, y al volver pegas la respuesta
+marcadores de color. Lo ll
+evas a ChatGPT, trabajas con él, y al volver pegas la respuesta
 en **Des-anonimizar** para recuperar los valores reales.
 
-<!-- TODO: captura de pantalla de la app aquí -->
+![Interfaz del Anonimizador: panel de entrada con las categorías a anonimizar y panel de resultado anonimizado](docs/screenshot.png)
 
 ## Qué detecta
 
