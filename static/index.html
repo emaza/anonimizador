@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anonimizador · beailabs</title>
+  <link rel="stylesheet" href="/styles.css?v=2" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="lockGrad" x1="0" y1="0" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#3D3D8F"/>
+              <stop offset="1" stop-color="#7C5CFC"/>
+            </linearGradient>
+          </defs>
+          <circle cx="22" cy="22" r="22" fill="url(#lockGrad)"/>
+          <path d="M16 20v-2.5a6 6 0 0 1 12 0V20" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <rect x="14" y="20" width="16" height="11" rx="2.6" fill="#fff"/>
+          <circle cx="22" cy="24.5" r="1.7" fill="#3D3D8F"/>
+          <rect x="21.2" y="25.4" width="1.6" height="3.4" rx="0.8" fill="#3D3D8F"/>
+        </svg>
+      </span>
+      <div class="brand-text">
+        <h1>Anonimizador <span class="dot">·</span> <span class="brand-accent">beailabs</span></h1>
+        <p class="brand-sub">Tapa los datos sensibles antes de usar la IA de la nube</p>
+      </div>
+    </div>
+    <div class="badges">
+      <div id="status" class="status status--unknown" title="Estado de Ollama">
+        <span class="status-led"></span>
+        <span id="status-text">Comprobando Ollama…</span>
+      </div>
+      <div class="badge-local">
+        <svg class="lock-dot" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <rect x="6" y="11" width="12" height="9" rx="2" fill="currentColor"/>
+        </svg>
+        100% local · Nada sale de tu máquina
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="grid">
+      <!-- ENTRADA -->
+      <article class="card">
+        <div class="card-head">
+          <h2>Entrada</h2>
+          <span class="hint">Pega texto o arrastra un archivo</span>
+        </div>
+
+        <div id="dropzone" class="dropzone">
+          <textarea id="input" placeholder="Pega aquí tu contrato, email o transcripción… o arrastra un .txt, .md, .docx o .pdf"></textarea>
+          <div id="drop-overlay" class="drop-overlay">Suelta el archivo para extraer el texto</div>
+        </div>
+
+        <div id="extract-msg" class="msg" hidden></div>
+
+        <div class="cat-block">
+          <span class="cat-title">Qué anonimizar:</span>
+          <div id="cat-row" class="cat-row">
+            <label class="cat"><input type="checkbox" value="PERSONA" checked> Personas</label>
+            <label class="cat"><input type="checkbox" value="EMPRESA" checked> Empresas</label>
+            <label class="cat"><input type="checkbox" value="EMAIL" checked> Emails</label>
+            <label class="cat"><input type="checkbox" value="TELEFONO" checked> Teléfonos</label>
+            <label class="cat"><input type="checkbox" value="DNI" checked> DNI/NIE</label>
+            <label class="cat"><input type="checkbox" value="IMPORTE"> Importes</label>
+            <label class="cat"><input type="checkbox" value="DIRECCION" checked> Direcciones</label>
+            <label class="cat"><input type="checkbox" value="CUENTA" checked> Cuentas</label>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button id="btn-anon" class="btn btn--primary">
+            <svg class="btn-lock" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <rect x="6" y="11" width="12" height="9" rx="2" fill="currentColor"/>
+            </svg>
+            Anonimizar
+          </button>
+          <div id="progress" class="progress" hidden>
+            <span class="spinner"></span>
+            <span>Procesando… <span id="timer">0.0</span> s</span>
+          </div>
+          <button id="btn-clear" class="btn btn--ghost">Limpiar</button>
+        </div>
+      </article>
+
+      <!-- RESULTADO -->
+      <article class="card">
+        <div class="card-head">
+          <h2>Resultado anonimizado</h2>
+          <button id="btn-copy-out" class="btn btn--soft" disabled>Copiar</button>
+        </div>
+        <div id="output" class="output" aria-live="polite">
+          <div class="empty-state">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M7 10.5V7.5a5 5 0 0 1 10 0v3" stroke="#C7B8FF" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+              <rect x="4.75" y="10.5" width="14.5" height="10" rx="2.6" stroke="#C7B8FF" stroke-width="1.3" fill="none"/>
+              <circle cx="12" cy="14.7" r="1.4" fill="#C7B8FF"/>
+              <path d="M12 15.8v2.1" stroke="#C7B8FF" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            <p class="empty-title">Aquí verás tu texto limpio</p>
+            <p class="empty-sub">Los datos sensibles se convertirán en etiquetas de color</p>
+          </div>
+        </div>
+        <div id="anon-msg" class="msg" hidden></div>
+      </article>
+    </section>
+
+    <!-- MAPA -->
+    <section class="card map-card">
+      <button id="map-toggle" class="map-toggle" aria-expanded="false">
+        <span class="chevron">▸</span>
+        Mapa de equivalencias <span id="map-count" class="badge">0</span>
+      </button>
+      <div id="map-body" class="map-body" hidden>
+        <table class="map-table">
+          <thead>
+            <tr><th>Marcador</th><th>Valor original</th><th>Tipo</th></tr>
+          </thead>
+          <tbody id="map-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- DES-ANONIMIZAR -->
+    <section class="card">
+      <div class="card-head">
+        <h2>Des-anonimizar</h2>
+        <span class="hint">Pega aquí la respuesta de ChatGPT para recuperar los datos</span>
+      </div>
+      <div class="deanon-grid">
+        <textarea id="deanon-input" placeholder="Pega la respuesta con marcadores como [PERSONA_1]…"></textarea>
+        <div class="deanon-arrow">→</div>
+        <div id="deanon-output" class="output">
+          <p class="placeholder-empty">Aquí verás el texto con los valores reales.</p>
+        </div>
+      </div>
+      <div class="card-actions">
+        <button id="btn-deanon" class="btn btn--primary">Des-anonimizar</button>
+        <button id="btn-copy-deanon" class="btn btn--soft" disabled>Copiar</button>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      Anonimizador · beailabs — proyecto open source · El texto nunca sale de tu ordenador ·
+      <a href="#" class="footer-link">Código en GitHub</a>
+    </footer>
+  </main>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="/app.js?v=2"></script>
+</body>
+</html>
