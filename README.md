@@ -20,6 +20,7 @@ en **Des-anonimizar** para recuperar los valores reales.
 | Emails | Cualquier dirección de correo | `[EMAIL_1]` |
 | Teléfonos | Formato español, con o sin prefijo +34 y separadores | `[TELEFONO_1]` |
 | DNI / NIE | 8 dígitos + letra o X/Y/Z + 7 dígitos + letra; admite puntos y guiones | `[DNI_1]` |
+| CIF | NIF de empresa: letra + 7 dígitos + control (dígito o letra), con guion, puntos o prefijo ES | `[CIF_1]` |
 | Importes | Cantidades con €, EUR o formato de miles español (1.500,00) | `[IMPORTE_1]` |
 | Direcciones | Tipo de vía + número, con o sin piso, código postal y ciudad | `[DIRECCION_1]` |
 | IBAN / cuentas | IBAN completo o parcial y cuentas de 20 dígitos | `[CUENTA_1]` |

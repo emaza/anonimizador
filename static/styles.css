@@ -216,6 +216,7 @@ textarea:focus { outline: none; border-color: var(--secondary); background: var(
 .ph-EMAIL     { background: #E1F0FF; color: #1d6fd6; }
 .ph-TELEFONO  { background: #E2F7EE; color: #128a5e; }
 .ph-DNI       { background: #FDECEC; color: #d24545; }
+.ph-CIF       { background: #FFEBE0; color: #c2531b; }
 .ph-IMPORTE   { background: #FFF2DC; color: #b5731a; }
 .ph-DIRECCION { background: #FCE6F4; color: #c0398f; }
 .ph-CUENTA    { background: #E6F3F5; color: #148a94; }

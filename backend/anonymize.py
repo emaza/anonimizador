@@ -1,7 +1,7 @@
 """Anonimización: regex (deterministas) + Ollama (NER) con deduplicación estable.
 
 Flujo:
-  1) Regex sobre patrones fijos: email, DNI/NIE, IBAN/cuenta, importe, teléfono.
+  1) Regex sobre patrones fijos: email, DNI/NIE, CIF, IBAN/cuenta, importe, teléfono.
   2) El texto ya con placeholders se manda a Ollama, que devuelve SOLO JSON con
      personas / empresas / direcciones.
   3) Se valida el JSON (1 reintento). Si falla, se lanza AnonymizeError.
@@ -34,6 +34,17 @@ DNI_RE = re.compile(
     r"(?<![\dA-Za-z])"
     r"(?:[XYZxyz]-?\d(?:\.?\d){6}|\d(?:\.?\d){7})"
     r"-?[A-Za-z]"
+    r"(?![\dA-Za-z])"
+)
+
+# CIF/NIF de empresa: letra de entidad + 7 dígitos + control (dígito o A-J). Admite
+# prefijo ES y guion/puntos (B-83839647, B83839647, ESB83839647). X/Y/Z son NIE.
+CIF_RE = re.compile(
+    r"(?<![\dA-Za-z])"
+    r"(?:ES[ \-]?)?"
+    r"[ABCDEFGHJNPQRSUVWabcdefghjnpqrsuvw]-?"
+    r"\d(?:\.?\d){6}"
+    r"-?[0-9A-Ja-j]"
     r"(?![\dA-Za-z])"
 )
 
@@ -98,6 +109,7 @@ DIRECCION_RE = re.compile(
 REGEX_RULES_FIJOS = [
     ("EMAIL", "EMAIL", EMAIL_RE),
     ("DNI", "DNI", DNI_RE),
+    ("CIF", "CIF", CIF_RE),
     ("CUENTA", "CUENTA", IBAN_RE),
     ("CUENTA", "CUENTA", CCC_RE),
     ("IMPORTE", "IMPORTE", IMPORTE_RE),
@@ -119,7 +131,7 @@ def _norm(category: str, value: str) -> str:
     v = value.strip()
     if category == "EMAIL":
         return v.lower()
-    if category in ("TELEFONO", "DNI", "CUENTA"):
+    if category in ("TELEFONO", "DNI", "CIF", "CUENTA"):
         return re.sub(r"[\s\-]", "", v).upper()
     if category == "IMPORTE":
         return re.sub(r"\s", "", v)
@@ -195,7 +207,7 @@ Analiza el TEXTO y extrae SOLO estas categorías, copiando las cadenas EXACTAMEN
   calle y número aunque falten el piso, el código postal o la ciudad).
 
 Reglas:
-- NO incluyas emails, teléfonos, DNI, importes ni cuentas: ya están sustituidos por marcadores como [EMAIL_1].
+- NO incluyas emails, teléfonos, DNI, CIF, importes ni cuentas: ya están sustituidos por marcadores como [EMAIL_1].
 - NO inventes datos que no estén en el texto.
 - Copia cada valor tal cual aparece, sin reformatear.
 - Responde ÚNICAMENTE con un objeto JSON válido, sin explicaciones ni texto adicional.
@@ -306,7 +318,7 @@ def call_ollama(text: str, model: str, timeout: float = 180.0) -> dict[str, list
 # Categorías que detecta el modelo (el resto son deterministas por regex).
 CATEGORIAS_MODELO = {"PERSONA", "EMPRESA", "DIRECCION"}
 # Todas las categorías admitidas.
-CATEGORIAS = ["PERSONA", "EMPRESA", "EMAIL", "TELEFONO", "DNI", "IMPORTE", "DIRECCION", "CUENTA"]
+CATEGORIAS = ["PERSONA", "EMPRESA", "EMAIL", "TELEFONO", "DNI", "CIF", "IMPORTE", "DIRECCION", "CUENTA"]
 
 
 def anonymize(text: str, model: str, categorias=None) -> dict:
@@ -328,7 +340,7 @@ def anonymize(text: str, model: str, categorias=None) -> dict:
 
     engine = Anonymizer()
 
-    # 1) Patrones fijos activos (email, DNI, cuenta, importe, teléfono).
+    # 1) Patrones fijos activos (email, DNI, CIF, cuenta, importe, teléfono).
     text = engine.apply_regex(text, [r for r in REGEX_RULES_FIJOS if r[0] in activas])
 
     # 2) Modelo: solo si alguna categoría suya está activa (si no, ni se llama a Ollama).
