@@ -50,7 +50,13 @@ else
 fi
 
 echo "› Servidor en http://localhost:${PORT}"
-( sleep 1.5; (open "http://localhost:${PORT}" 2>/dev/null || true) ) &
+# Abrir el navegador: xdg-open en Linux, open en macOS.
+if command -v xdg-open >/dev/null 2>&1; then OPENER=xdg-open
+elif command -v open >/dev/null 2>&1; then OPENER=open
+else OPENER=""; fi
+if [ -n "$OPENER" ]; then
+  ( sleep 1.5; "$OPENER" "http://localhost:${PORT}" >/dev/null 2>&1 || true ) &
+fi
 
 cd backend
 exec python -m uvicorn app:app --host 127.0.0.1 --port "${PORT}"
